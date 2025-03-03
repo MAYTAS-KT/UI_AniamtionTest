@@ -14,7 +14,7 @@ public class UIManager : MonoBehaviour
 
     
 
-    public void Start()
+    public void Awake()
     {
         InstantiateElementUI();
 
