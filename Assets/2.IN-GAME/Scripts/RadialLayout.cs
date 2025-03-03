@@ -14,6 +14,8 @@ public class RadialLayout : MonoBehaviour
     private float animationProgress = 0f;
     private bool targetHalfCircleState;
 
+    public Animator animator;
+
     void Update()
     {
         if (isAnimating)
@@ -61,6 +63,7 @@ public class RadialLayout : MonoBehaviour
             }
 
             currentAngle += angleStep;
+            child.rotation = Quaternion.identity;
         }
     }
 
@@ -112,6 +115,7 @@ public class RadialLayout : MonoBehaviour
             }
 
             currentAngle += currentAngleStep;
+            child.rotation = Quaternion.identity;
         }
     }
 
@@ -119,8 +123,19 @@ public class RadialLayout : MonoBehaviour
     {
         if (isAnimating) return; // Prevent toggling during animation
 
+        if(!halfCircle){
+            animator.Play("Open");
+        } else {
+            animator.Play("Close");
+        }
         targetHalfCircleState = !halfCircle;
         isAnimating = true;
         animationProgress = 0f;
     }
+
+    public void delayToggleCircleState()
+    {
+        Invoke("ToggleCircleState", 0.25f);
+    }
+
 }
