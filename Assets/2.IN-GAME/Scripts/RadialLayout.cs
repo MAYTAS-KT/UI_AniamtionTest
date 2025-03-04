@@ -9,18 +9,38 @@ public class RadialLayout : MonoBehaviour
     public float offsetAngle = 0f; // Offset angle in degrees
     public float animationDuration = 0.5f; // Duration of the transition animation
     public Vector2 childSize = new Vector2(100f, 100f); // Size of each child (width, height)
+    public float middleChildScale = 1.2f; // Scale factor for the middle child in half-circle mode
 
     private bool isAnimating = false;
+    private bool isChildAnimating = false;
     private float animationProgress = 0f;
+    private float childAnimationProgress = 0f;
     private bool targetHalfCircleState;
-
     public Animator animator;
+
+    private Transform rotatingChild;
+    private Vector2 startPosition;
+    private Vector2 endPosition;
+    private float startAngle;
+    private float endAngle;
+
+    public void Start()
+    {
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            transform.GetChild(i).GetComponent<Button>().onClick.AddListener(RotateChildren);
+        }
+    }
 
     void Update()
     {
         if (isAnimating)
         {
             AnimateLayout();
+        }
+        else if (isChildAnimating)
+        {
+            AnimateChildLayout();
         }
         else
         {
@@ -60,6 +80,16 @@ public class RadialLayout : MonoBehaviour
             else
             {
                 child.localRotation = Quaternion.Euler(0f, 0f, currentAngle);
+            }
+
+            // Scale the middle child in half-circle mode
+            if (halfCircle && i == childCount / 2)
+            {
+                child.localScale = Vector3.one * middleChildScale;
+            }
+            else
+            {
+                child.localScale = Vector3.one;
             }
 
             currentAngle += angleStep;
@@ -114,18 +144,51 @@ public class RadialLayout : MonoBehaviour
                 child.localRotation = Quaternion.Lerp(child.localRotation, targetRotation, animationProgress);
             }
 
+            // Scale the middle child in half-circle mode
+            if (targetHalfCircleState && i == childCount / 2)
+            {
+                child.localScale = Vector3.Lerp(child.localScale, Vector3.one * middleChildScale, animationProgress);
+            }
+            else
+            {
+                child.localScale = Vector3.Lerp(child.localScale, Vector3.one, animationProgress);
+            }
+
             currentAngle += currentAngleStep;
             child.rotation = Quaternion.identity;
         }
+    }
+
+    void AnimateChildLayout()
+    {
+        childAnimationProgress += Time.deltaTime / animationDuration;
+        if (childAnimationProgress >= 1f)
+        {
+            childAnimationProgress = 1f;
+            isChildAnimating = false;
+            rotatingChild.SetAsFirstSibling();
+            ArrangeChildren();
+            return;
+        }
+
+        // Interpolate the angle for anti-clockwise rotation
+        float angle = Mathf.Lerp(startAngle, endAngle, childAnimationProgress) * Mathf.Deg2Rad;
+        float x = -Mathf.Cos(angle) * radius;
+        float y = Mathf.Sin(angle) * radius;
+
+        rotatingChild.GetComponent<RectTransform>().anchoredPosition = new Vector2(x, y);
     }
 
     public void ToggleCircleState()
     {
         if (isAnimating) return; // Prevent toggling during animation
 
-        if(!halfCircle){
+        if (!halfCircle)
+        {
             animator.Play("Open");
-        } else {
+        }
+        else
+        {
             animator.Play("Close");
         }
         targetHalfCircleState = !halfCircle;
@@ -138,4 +201,22 @@ public class RadialLayout : MonoBehaviour
         Invoke("ToggleCircleState", 0.25f);
     }
 
+    public void RotateChildren()
+    {
+        if (!halfCircle) return; // Only rotate in half-circle mode
+
+        int childCount = transform.childCount;
+        if (childCount == 0) return;
+
+        // Get the last child
+        rotatingChild = transform.GetChild(childCount - 1);
+
+        // Calculate start and end angles for anti-clockwise rotation
+        startAngle = offsetAngle + (childCount - 1) * (180f / childCount); // Start at the last child's position
+        endAngle = startAngle - 180f; // Move anti-clockwise by 180 degrees
+
+        // Start the animation
+        isChildAnimating = true;
+        childAnimationProgress = 0f;
+    }
 }
