@@ -16,6 +16,10 @@ public class UIManager : MonoBehaviour
 
     public static UIManager instance;
 
+[Header("Audio/Extra")]
+    public AudioSource audioSource1;
+    public AudioSource audioSource2;
+
     public void Awake()
     {
         if (instance == null)
@@ -37,6 +41,7 @@ public class UIManager : MonoBehaviour
             element.SetElementInfo(elementUIData.UIelements[i]);
             string name = elementUIData.UIelements[i].ElementType.ToString();
             element.elementButton.onClick.AddListener(() => elementName.text = name);
+            element.elementButton.onClick.AddListener(() => audioSource2.Play());
         }
     }
 
