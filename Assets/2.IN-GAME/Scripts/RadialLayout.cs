@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -24,6 +25,8 @@ public class RadialLayout : MonoBehaviour
     private float startAngle;
     private float endAngle;
 
+
+private Dictionary<Button, UnityEngine.Events.UnityAction> buttonListeners = new Dictionary<Button, UnityEngine.Events.UnityAction>();
     public void Start()
     {
         AddListenerTOButton();
@@ -31,13 +34,27 @@ public class RadialLayout : MonoBehaviour
 
     private void AddListenerTOButton()
     {
-        for (int i = 0; i < transform.childCount; i++)
+    for (int i = 0; i < transform.childCount; i++)
+    {
+        Button button = transform.GetChild(i).GetComponent<Button>();
+        if (button == null) continue; 
+
+        // Remove the previous listener if it exists
+        if (buttonListeners.ContainsKey(button))
         {
-            int temp = i;
-            transform.GetChild(i).GetComponent<Button>().onClick.RemoveAllListeners();
-            transform.GetChild(i).GetComponent<Button>().onClick.AddListener(() => checkMoveType(temp)); // Default: last to first
-        }
+            button.onClick.RemoveListener(buttonListeners[button]);
+            buttonListeners.Remove(button);
+        } 
+
+        int temp = i;
+        UnityEngine.Events.UnityAction action = () => checkMoveType(temp); 
+        
+        // Store the listener reference
+        buttonListeners[button] = action;
+        // Add the listener
+        button.onClick.AddListener(action);
     }
+     }
 
     void Update()
     {
@@ -172,7 +189,7 @@ public class RadialLayout : MonoBehaviour
         if (childAnimationProgress >= 1f)
         {
             childAnimationProgress = 1f;
-            
+
             // Move the rotating child to its new position in the hierarchy
             if (rotatingChild != null)
             {
@@ -190,7 +207,7 @@ public class RadialLayout : MonoBehaviour
 
             // Rearrange the children
             ArrangeChildren();
-            if(isChildAnimating)
+            if (isChildAnimating)
             {
                 AddListenerTOButton();
             }
@@ -256,15 +273,35 @@ public class RadialLayout : MonoBehaviour
         childAnimationProgress = 0f;
     }
 
-
-     private void checkMoveType(int childIndex)
-     {
-        if(isChildAnimating||transform.childCount/2==childIndex)
+    private void checkMoveType(int childIndex)
+    {
+        print("childIndex: " + childIndex);
+        if (isChildAnimating || transform.childCount / 2 == childIndex)
         {
             return;
         }
-        print(childIndex);
-        RotateChildren(childIndex>transform.childCount/2);
-     }
-     
+        
+        int middleChildIndex = transform.childCount / 2;
+        int difference = Mathf.Abs(childIndex - middleChildIndex);
+
+        if (difference == 1)
+        {
+            // If the child is next to the middle child, move it once
+            RotateChildren(childIndex > middleChildIndex);
+        }
+        else
+        {
+            // If the child is not next to the middle child, move it multiple times
+            StartCoroutine(MoveChildMultipleTimes(childIndex, difference));
+        }
+    }
+
+    private System.Collections.IEnumerator MoveChildMultipleTimes(int childIndex, int difference)
+    {
+        for (int i = 0; i < difference; i++)
+        {
+            RotateChildren(childIndex > transform.childCount / 2);
+            yield return new WaitUntil(() => !isChildAnimating); // Wait for the current animation to finish
+        }
+    }
 }
