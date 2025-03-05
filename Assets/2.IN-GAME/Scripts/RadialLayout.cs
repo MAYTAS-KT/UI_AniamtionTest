@@ -9,6 +9,7 @@ public class RadialLayout : MonoBehaviour
     public bool halfCircle = false; // Toggle between full circle and half circle
     public float offsetAngle = 0f; // Offset angle in degrees
     public float animationDuration = 0.5f; // Duration of the transition animation
+    public float childChangeanimationDuration = 0.5f; // Duration of the transition animation
     public Vector2 childSize = new Vector2(100f, 100f); // Size of each child (width, height)
     public float middleChildScale = 1.2f; // Scale factor for the middle child in half-circle mode
 
@@ -20,6 +21,7 @@ public class RadialLayout : MonoBehaviour
     public Animator animator;
 
     private Transform rotatingChild;
+    private int rotatingChildIndex;
     private Vector2 startPosition;
     private Vector2 endPosition;
     private float startAngle;
@@ -142,6 +144,10 @@ private Dictionary<Button, UnityEngine.Events.UnityAction> buttonListeners = new
 
         for (int i = 0; i < childCount; i++)
         {
+            if(rotatingChild != null && rotatingChildIndex == i)
+            {
+                continue;
+            }
             RectTransform child = transform.GetChild(i) as RectTransform;
             if (child == null) continue;
 
@@ -185,7 +191,7 @@ private Dictionary<Button, UnityEngine.Events.UnityAction> buttonListeners = new
 
     void AnimateChildLayout()
     {
-        childAnimationProgress += Time.deltaTime / animationDuration;
+        childAnimationProgress += Time.deltaTime / childChangeanimationDuration;
         if (childAnimationProgress >= 1f)
         {
             childAnimationProgress = 1f;
@@ -211,6 +217,7 @@ private Dictionary<Button, UnityEngine.Events.UnityAction> buttonListeners = new
             {
                 AddListenerTOButton();
             }
+            rotatingChild=null;//So that while closing button is should Animate Prorely
             isChildAnimating = false;
             return;
         }
@@ -221,6 +228,7 @@ private Dictionary<Button, UnityEngine.Events.UnityAction> buttonListeners = new
         float y = Mathf.Sin(angle) * radius;
 
         rotatingChild.GetComponent<RectTransform>().anchoredPosition = new Vector2(x, y);
+        AnimateLayout();
     }
 
     public void ToggleCircleState()
@@ -230,6 +238,7 @@ private Dictionary<Button, UnityEngine.Events.UnityAction> buttonListeners = new
         if (!halfCircle)
         {
             animator.Play("Open");
+            transform.GetChild(transform.childCount/2).GetComponent<Button>().onClick.Invoke();
         }
         else
         {
@@ -238,6 +247,7 @@ private Dictionary<Button, UnityEngine.Events.UnityAction> buttonListeners = new
         targetHalfCircleState = !halfCircle;
         isAnimating = true;
         animationProgress = 0f;
+        childAnimationProgress= 0f;
     }
 
     public void delayToggleCircleState()
@@ -257,6 +267,7 @@ private Dictionary<Button, UnityEngine.Events.UnityAction> buttonListeners = new
         {
             // Move first child to last position
             rotatingChild = transform.GetChild(0);
+            rotatingChildIndex = 0;
             startAngle = offsetAngle; // Start at the first child's position
             endAngle = startAngle + 180f; // Move clockwise by 180 degrees
         }
@@ -264,6 +275,7 @@ private Dictionary<Button, UnityEngine.Events.UnityAction> buttonListeners = new
         {
             // Move last child to first position
             rotatingChild = transform.GetChild(childCount - 1);
+            rotatingChildIndex = childCount - 1;
             startAngle = offsetAngle + (childCount - 1) * (180f / childCount); // Start at the last child's position
             endAngle = startAngle - 180f; // Move anti-clockwise by 180 degrees
         }
@@ -271,6 +283,7 @@ private Dictionary<Button, UnityEngine.Events.UnityAction> buttonListeners = new
         // Start the animation
         isChildAnimating = true;
         childAnimationProgress = 0f;
+        animationProgress = 0f;
     }
 
     private void checkMoveType(int childIndex)
