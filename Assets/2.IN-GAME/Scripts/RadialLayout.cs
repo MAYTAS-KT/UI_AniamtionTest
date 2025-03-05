@@ -26,9 +26,16 @@ public class RadialLayout : MonoBehaviour
 
     public void Start()
     {
+        AddListenerTOButton();
+    }
+
+    private void AddListenerTOButton()
+    {
         for (int i = 0; i < transform.childCount; i++)
         {
-            transform.GetChild(i).GetComponent<Button>().onClick.AddListener(RotateChildren);
+            int temp = i;
+            transform.GetChild(i).GetComponent<Button>().onClick.RemoveAllListeners();
+            transform.GetChild(i).GetComponent<Button>().onClick.AddListener(() => checkMoveType(temp)); // Default: last to first
         }
     }
 
@@ -165,13 +172,33 @@ public class RadialLayout : MonoBehaviour
         if (childAnimationProgress >= 1f)
         {
             childAnimationProgress = 1f;
-            isChildAnimating = false;
-            rotatingChild.SetAsFirstSibling();
+            
+            // Move the rotating child to its new position in the hierarchy
+            if (rotatingChild != null)
+            {
+                if (startAngle < endAngle)
+                {
+                    // Move first child to last position
+                    rotatingChild.SetAsLastSibling();
+                }
+                else
+                {
+                    // Move last child to first position
+                    rotatingChild.SetAsFirstSibling();
+                }
+            }
+
+            // Rearrange the children
             ArrangeChildren();
+            if(isChildAnimating)
+            {
+                AddListenerTOButton();
+            }
+            isChildAnimating = false;
             return;
         }
 
-        // Interpolate the angle for anti-clockwise rotation
+        // Interpolate the angle for rotation
         float angle = Mathf.Lerp(startAngle, endAngle, childAnimationProgress) * Mathf.Deg2Rad;
         float x = -Mathf.Cos(angle) * radius;
         float y = Mathf.Sin(angle) * radius;
@@ -201,22 +228,43 @@ public class RadialLayout : MonoBehaviour
         Invoke("ToggleCircleState", 0.25f);
     }
 
-    public void RotateChildren()
+    public void RotateChildren(bool moveFirstToLast)
     {
         if (!halfCircle) return; // Only rotate in half-circle mode
 
         int childCount = transform.childCount;
         if (childCount == 0) return;
 
-        // Get the last child
-        rotatingChild = transform.GetChild(childCount - 1);
-
-        // Calculate start and end angles for anti-clockwise rotation
-        startAngle = offsetAngle + (childCount - 1) * (180f / childCount); // Start at the last child's position
-        endAngle = startAngle - 180f; // Move anti-clockwise by 180 degrees
+        // Determine which child to rotate
+        if (moveFirstToLast)
+        {
+            // Move first child to last position
+            rotatingChild = transform.GetChild(0);
+            startAngle = offsetAngle; // Start at the first child's position
+            endAngle = startAngle + 180f; // Move clockwise by 180 degrees
+        }
+        else
+        {
+            // Move last child to first position
+            rotatingChild = transform.GetChild(childCount - 1);
+            startAngle = offsetAngle + (childCount - 1) * (180f / childCount); // Start at the last child's position
+            endAngle = startAngle - 180f; // Move anti-clockwise by 180 degrees
+        }
 
         // Start the animation
         isChildAnimating = true;
         childAnimationProgress = 0f;
     }
+
+
+     private void checkMoveType(int childIndex)
+     {
+        if(isChildAnimating||transform.childCount/2==childIndex)
+        {
+            return;
+        }
+        print(childIndex);
+        RotateChildren(childIndex>transform.childCount/2);
+     }
+     
 }
