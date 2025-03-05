@@ -12,12 +12,21 @@ public class UIManager : MonoBehaviour
    
     private float elapsedTime = 0f;
 
-    
+    public SkillTree skilltreeIcon;
+
+    public static UIManager instance;
 
     public void Awake()
     {
+        if (instance == null)
+        {
+            instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
         InstantiateElementUI();
-
     }
 
     private void InstantiateElementUI()

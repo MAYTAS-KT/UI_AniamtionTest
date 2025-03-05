@@ -19,6 +19,9 @@ public class ElementUI
    public ElementType ElementType;
    public Sprite icon;
    public Sprite desaturatedIcon;
+
+   public float initialfillAmount=0f;
+   public int skillUnlocked=1;
 }
 
 

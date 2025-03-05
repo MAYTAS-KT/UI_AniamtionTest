@@ -131,6 +131,7 @@ GameObject:
   - component: {fileID: 154889421}
   - component: {fileID: 154889420}
   - component: {fileID: 154889422}
+  - component: {fileID: 154889423}
   m_Layer: 5
   m_Name: TreeHolder
   m_TagString: Untagged
@@ -150,12 +151,12 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 497308108}
-  - {fileID: 779151650}
   - {fileID: 796951217}
-  - {fileID: 1819242338}
-  - {fileID: 1556693337}
   - {fileID: 1980694511}
+  - {fileID: 779151650}
+  - {fileID: 1556693337}
+  - {fileID: 1819242338}
+  - {fileID: 497308108}
   m_Father: {fileID: 1623681344}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -213,6 +214,28 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &154889423
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 154889418}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a4c240bbace44955bda28de7f38b04d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  skillIcons:
+  - {fileID: 796951218}
+  - {fileID: 1980694512}
+  - {fileID: 779151651}
+  - {fileID: 1556693338}
+  - {fileID: 1819242339}
+  - {fileID: 497308109}
+  unlockedSkillSprite: {fileID: 21300000, guid: 81b9067386462460eb1c7a6fcde34c62, type: 3}
+  lockedSkillSprite: {fileID: 21300000, guid: 03e479b0046a84b22bace0efea762107, type: 3}
+  darkSkillSprite: {fileID: 21300000, guid: 349ab1753494c4d6e83b3aeeaa07b173, type: 3}
 --- !u!1 &157639379
 GameObject:
   m_ObjectHideFlags: 0
@@ -1117,6 +1140,7 @@ MonoBehaviour:
   elementUIPrefab: {fileID: 6228932564933799985, guid: 64e7db3e27fda4f829484141a0c969de, type: 3}
   elementParent: {fileID: 1011671155}
   elementName: {fileID: 157639381}
+  skilltreeIcon: {fileID: 154889423}
 --- !u!4 &954179313
 Transform:
   m_ObjectHideFlags: 0
