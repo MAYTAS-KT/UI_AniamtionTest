@@ -22,6 +22,7 @@ public class ElementUI
 
    public float initialfillAmount=0f;
    public int skillUnlocked=1;
+   public float skillTreeTargetfill = 0.5f;
 }
 
 

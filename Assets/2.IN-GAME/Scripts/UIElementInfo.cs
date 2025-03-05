@@ -11,6 +11,7 @@ public class UIElementInfo : MonoBehaviour
     private float targetFill;
     private float animationDuration = 0.5f; // Adjust duration for speed
     private int skillUnlocked = 1;
+    private float skillTreeTargetfill = 0.5f;
 
     private void Start()
     {
@@ -24,11 +25,12 @@ public class UIElementInfo : MonoBehaviour
         icon.fillAmount = elementUI.initialfillAmount;
         targetFill = elementUI.initialfillAmount; // Store target fill amount
         skillUnlocked = elementUI.skillUnlocked;
+        skillTreeTargetfill=elementUI.skillTreeTargetfill;
     }
 
     public void OnElementClick()
     {
-        UIManager.instance.skilltreeIcon.UnlockSkill(skillUnlocked);
+        UIManager.instance.skilltreeIcon.UnlockSkill(skillUnlocked,skillTreeTargetfill);
         StopAllCoroutines(); // Stop any existing animation
         StartCoroutine(AnimateFill(0, targetFill, animationDuration));
     }
